@@ -1,0 +1,73 @@
+image: node:16
+
+variables:
+  GIT_DEPTH: 0
+
+stages:
+  - setup
+  - test
+  - configure
+  - deploy
+
+install-dependencies:
+  stage: setup
+  script:
+    - yarn install --pure-lockfile --cache-folder .yarn
+  tags:
+    - docker
+
+.distributed:
+  interruptible: true
+  tags:
+    - docker
+
+build:
+  stage: test
+  extends: .distributed
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - dist/
+      # TODO Remove once cache is fixed
+      - node_modules/
+
+test:
+  stage: test
+  extends: .distributed
+  
+
+lint:
+  stage: test
+  extends: .distributed
+
+docs:
+  stage: test
+  extends: .distributed
+
+
+configure:
+  stage: configure
+  cache:
+    key:
+      files:
+        - yarn.lock
+    paths:
+      - node_modules/
+      - .yarn
+    policy: pull
+  tags:
+    - docker
+
+.kaniko:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  tags:
+    - k8s
+
+deploy docs:
+  stage: deploy
+
+deploy coverage:
+  stage: deploy
+  extends: .kaniko
