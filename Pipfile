@@ -9,6 +9,11 @@ pyyaml = "*"
 pytest = "*"
 prettytable = "*"
 progress = "*"
+typer = "*"
+shellingham = "*"
+colorama = "*"
+py-markdown-table = "*"
+pytablewriter = "*"
 
 [dev-packages]
 
